@@ -1282,25 +1282,25 @@ class BaseImage(Resource):
 
         """
 
-	    if rows is None:
-	        rows = columns
+	if rows is None:
+		rows = columns
 
 
         if not isinstance(columns, numbers.Integral):
-            raise TypeError('columns must be a natural number, not ' +
+        	raise TypeError('columns must be a natural number, not ' +
                             repr(columns))
         elif not isinstance(rows, numbers.Integral):
-            raise TypeError('rows must be a natural number, not ' +
+        	raise TypeError('rows must be a natural number, not ' +
                             repr(rows))
         elif columns < 1:
-            raise ValueError('columns must be a natural number, not ' +
+        	raise ValueError('columns must be a natural number, not ' +
                              repr(columns))
         elif rows < 1:
-            raise ValueError('rows must be a natural number, not ' +
+        	raise ValueError('rows must be a natural number, not ' +
                              repr(rows))
 	
         
-	    # we try to fit the dimension like PIL does 
+	# we try to fit the dimension like PIL does 
         if fit:
             width, height = self.size
             rel = float( width ) / float( height )
@@ -1309,8 +1309,8 @@ class BaseImage(Resource):
             else: columns = int( rows * rel )
 
 
-	    width = columns
-	    height = rows
+	width = columns
+	height = rows
 
         if self.animation:
             self.wand = library.MagickCoalesceImages(self.wand)
