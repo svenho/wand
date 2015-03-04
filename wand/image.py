@@ -1250,6 +1250,83 @@ class BaseImage(Resource):
             library.MagickSetSize(self.wand, width, height)
             if not r:
                 self.raise_exception()
+                
+    
+    @manipulative
+    def thumbnail(self, columns, rows=None, fit=True):
+        """Create a thumbnail of the image.
+
+        :param width: the width in the scaled image. default is the original
+                      width
+        :type width: :class:`numbers.Integral`
+        :param height: the height in the scaled image. default is the original
+                       height
+        :type height: :class:`numbers.Integral`
+        :param filter: a filter type to use for resizing. choose one in
+                       :const:`FILTER_TYPES`. default is ``'undefined'``
+                       which means IM will try to guess best one to use
+        :type filter: :class:`basestring`, :class:`numbers.Integral`
+        :param blur: the blur factor where > 1 is blurry, < 1 is sharp.
+                     default is 1
+        :type blur: :class:`numbers.Real`
+
+        .. versionchanged:: 0.2.1
+           The default value of ``filter`` has changed from ``'triangle'``
+           to ``'undefined'`` instead.
+
+        .. versionchanged:: 0.1.8
+           The ``blur`` parameter changed to take :class:`numbers.Real`
+           instead of :class:`numbers.Rational`.
+
+        .. versionadded:: 0.1.1
+
+        """
+
+	    if rows is None:
+	        rows = columns
+
+
+        if not isinstance(columns, numbers.Integral):
+            raise TypeError('columns must be a natural number, not ' +
+                            repr(columns))
+        elif not isinstance(rows, numbers.Integral):
+            raise TypeError('rows must be a natural number, not ' +
+                            repr(rows))
+        elif columns < 1:
+            raise ValueError('columns must be a natural number, not ' +
+                             repr(columns))
+        elif rows < 1:
+            raise ValueError('rows must be a natural number, not ' +
+                             repr(rows))
+	
+        
+	    # we try to fit the dimension like PIL does 
+        if fit:
+            width, height = self.size
+            rel = float( width ) / float( height )
+            bounds = float( columns ) / float( rows )
+            if rel >= bounds: rows = int( columns / rel )
+            else: columns = int( rows * rel )
+
+
+	    width = columns
+	    height = rows
+
+        if self.animation:
+            self.wand = library.MagickCoalesceImages(self.wand)
+            library.MagickSetLastIterator(self.wand)
+            n = library.MagickGetIteratorIndex(self.wand)
+            library.MagickResetIterator(self.wand)
+            for i in xrange(n + 1):
+                library.MagickSetIteratorIndex(self.wand, i)
+                library.MagickThumbnailImage(self.wand, columns, rows )
+            library.MagickSetSize(self.wand, width, height)
+        else:
+            r = library.MagickThumbnailImage(self.wand, columns, rows )
+            library.MagickSetSize(self.wand, width, height)
+            if not r:
+                self.raise_exception()
+                
 
     @manipulative
     def sample(self, width=None, height=None):
